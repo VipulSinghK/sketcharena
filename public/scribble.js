@@ -403,13 +403,41 @@ socket.on('round-end', data => {
 });
 
 socket.on('game-end', data => {
-    roundTransition.innerHTML = `
-        <h2>Game Over!</h2>
-        <p>Winner: ${data.winner.username} with ${data.winner.score} points</p>
-        <ul>${data.scores.map(score => `<li>${score.username}: ${score.score}</li>`).join('')}</ul>
+    // Create structured HTML for the game over screen
+    let gameOverHTML = `
+        <div class="game-over-content">
+            <h2>Game Over!</h2>
+            <p class="winner-text">Winner: <span>${data.winner.username}</span> with <span>${data.winner.score}</span> points</p>
+            <div class="final-scores">
+                <h3>Final Scores</h3>
+                <ul>${data.scores.map(score => `<li><span class="score-username">${score.username}</span>: <span class="score-points">${score.score}</span></li>`).join('')}</ul>
+            </div>
     `;
+
+    // Add "Play Again" button only if the user is the admin
+    if (isAdmin) {
+        gameOverHTML += `
+            <button id="play-again-btn" class="game-button">Play Again</button>
+        `;
+    }
+
+    gameOverHTML += `</div>`;
+    roundTransition.innerHTML = gameOverHTML;
     roundTransition.classList.remove('hidden');
-    setTimeout(() => roundTransition.classList.add('hidden'), 10000);
+
+    // Add event listener for "Play Again" button if admin
+    if (isAdmin) {
+        const playAgainBtn = document.getElementById('play-again-btn');
+        playAgainBtn.addEventListener('click', () => {
+            socket.emit('start-game'); // Trigger a new game
+            roundTransition.classList.add('hidden'); // Hide the game over screen
+        });
+    }
+
+    // Auto-hide after 10 seconds if no action is taken
+    setTimeout(() => {
+        roundTransition.classList.add('hidden');
+    }, 10000);
 });
 
 socket.on('room-reset', () => {
