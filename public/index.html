@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scribble Game</title>
+    <link rel="icon" type="image/png" href="favicon.png">
+<link rel="shortcut icon" type="image/x-icon" href="favicon.ico">
+    <link rel="stylesheet" href="scribble.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Welcome Screen -->
+        <div class="welcome-screen">
+            <div class="welcome-content">
+                <h2>Welcome to Sketch Arena by Vipul!</h2>
+                <p>Think🎨, sketch✏️, win🏆.</p>
+                <div class="username-section">
+                    <input type="text" id="username" placeholder="Enter your name" maxlength="15">
+                    <button id="submit-username-btn">Submit</button>
+                </div>
+                <div class="game-options hidden">
+                    <div class="option">
+                        <h3>Create a Room</h3>
+                        <button id="create-room-btn">Create Room</button>
+                    </div>
+                    <div class="option">
+                        <h3>Join a Room</h3>
+                        <input type="text" id="room-id-input" placeholder="Enter Room Code">
+                        <button id="join-room-btn">Join Room</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Game Container -->
+        <div class="game-container hidden">
+            <div class="header">
+                <h1>Sketch Arena✏️</h1>
+                <div class="user-info">
+                    <span id="username-display"></span>
+                    <span id="room-code"></span>
+                </div>
+            </div>
+            
+            <div class="main-area">
+                <div class="game-info">
+                    <div id="word-display">Waiting for round to start...</div>
+                    <div id="timer">Time: 60s</div>
+                </div>
+                
+                <div class="canvas-container">
+                    <canvas id="drawing-board"></canvas>
+                </div>
+                
+                <div class="drawing-tools">
+                    <div class="color-picker">
+                        <div class="color-option" data-color="#000000" style="background-color: #000000;"></div>
+                        <div class="color-option" data-color="#ff0000" style="background-color: #ff0000;"></div>
+                        <div class="color-option" data-color="#0000ff" style="background-color: #0000ff;"></div>
+                        <div class="color-option" data-color="#00ff00" style="background-color: #00ff00;"></div>
+                        <div class="color-option" data-color="#ffff00" style="background-color: #ffff00;"></div>
+                        <div class="color-option" data-color="#ffa500" style="background-color: #ffa500;"></div>
+                        <div class="color-option" data-color="#800080" style="background-color: #800080;"></div>
+                        <div class="color-option" data-color="#a52a2a" style="background-color: #a52a2a;"></div>
+                    </div>
+                    <div class="brush-size">
+                        <input type="range" id="brush-size" min="1" max="20" value="5">
+                        <span>Brush Size</span>
+                    </div>
+                    <button id="clear-btn">Clear Canvas</button>
+                </div>
+            </div>
+            
+            <div class="sidebar">
+                <div class="players">
+                    <h3>Players</h3>
+                    <ul id="players-list"></ul>
+                </div>
+                <div class="chat">
+                    <h3>Chat</h3>
+                    <div id="chat-messages"></div>
+                    <div class="chat-input">
+                        <input type="text" id="chat-input" placeholder="Type your guess...">
+                        <button id="send-btn">Send</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Round Transition Screen -->
+        <div class="round-transition hidden">
+            <h2 id="round-message">Round starting...</h2>
+            <div id="word-reveal"></div>
+            <div id="scores-update"></div>
+        </div>
+    </div>
+    
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="scribble.js"></script>
+</body>
+</html>
