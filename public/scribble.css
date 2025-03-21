@@ -6,49 +6,47 @@
 }
 
 body {
-
     background-color: #f0f2f5;
+    overflow-x: hidden; /* Prevent horizontal scroll on mobile */
 }
 
 .container {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 20px;
+    padding: 10px; /* Reduced padding for mobile */
 }
 
-
-
+/* Header - Scribble Style */
 .header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px;
-    padding: 10px;
-    background-color: #ffffff;
+    padding: 10px 15px;
+    background-color: #fff;
     border-radius: 10px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    box-shadow: 3px 3px 0 #4b74e0, -3px -3px 0 #ff6f61;
+    border: 2px dashed #333;
+    position: relative;
+    margin-bottom: 15px;
 }
 
 .header h1 {
     color: #4a4a4a;
-    font-size: 28px;
-    font-family: 'Caveat', cursive;
+    font-size: clamp(20px, 5vw, 28px); /* Responsive font size */
+    font-family: 'Permanent Marker', cursive;
     text-shadow: 2px 2px 0 #4b74e0;
-    letter-spacing: 1px;
-    transform: rotate(-1deg);
-    display: inline-block;
-    position: relative;
+    transform: rotate(-2deg);
 }
 
 .header h1::after {
     content: '';
     position: absolute;
-    bottom: -3px;
-    left: 0;
-    width: 100%;
-    height: 3px;
-    border-radius: 2px;
-    transform: rotate(0.5deg);
+    bottom: 5px;
+    left: 10px;
+    width: 90%;
+    height: 4px;
+    background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 10"><path d="M0 5 Q25 2 50 5 T100 5" stroke="#ff6f61" stroke-width="2" fill="none"/></svg>') repeat-x;
+    background-size: 50px 10px;
 }
 
 .header h1:hover {
@@ -56,100 +54,173 @@ body {
 }
 
 @keyframes wobble {
-    0%, 100% { transform: rotate(-1deg); }
+    0%, 100% { transform: rotate(-2deg); }
     25% { transform: rotate(0deg); }
-    50% { transform: rotate(-2deg); }
-    75% { transform: rotate(-0.5deg); }
+    50% { transform: rotate(-3deg); }
+    75% { transform: rotate(-1deg); }
 }
 
 .user-info {
     display: flex;
     align-items: center;
+    gap: 5px;
+    font-family: 'Permanent Marker', cursive;
+    font-size: clamp(12px, 3vw, 14px);
+}
+
+#room-code {
+    font-weight: bold;
+    color: #ff4081;
+    text-decoration: wavy underline;
+}
+
+/* Game Container */
+.game-container {
+    display: flex;
+    flex-direction: row;
+    gap: 15px;
+    padding: 10px;
+}
+
+/* Main Area */
+.main-area {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
     gap: 10px;
 }
 
-.user-info input {
-    padding: 8px 12px;
-    border: 2px solid #4b74e0;
-    border-radius: 5px;
-    font-size: 14px;
-    font-family: 'Permanent Marker', cursive;
-    background: #fff;
-    box-shadow: 3px 3px 0 #4b74e0;
-    transition: all 0.2s ease-in-out;
-}
-
-.user-info input:focus {
-    border-color: #ff6f61;
-    box-shadow: 3px 3px 8px rgba(255, 111, 97, 0.5);
-    transform: rotate(-2deg);
-}
-
-.user-info button {
-    padding: 8px 16px;
-    background-color: #4b74e0;
-    color: white;
-    border: 2px solid black;
+.game-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    background-color: #fef3c7;
+    border: 2px dashed #4b74e0;
     border-radius: 8px;
-    cursor: pointer;
-    font-size: 14px;
+}
+
+#word-display {
+    font-size: clamp(18px, 4vw, 24px);
+    font-weight: bold;
+    color: #4a4a4a;
     font-family: 'Permanent Marker', cursive;
-    box-shadow: 3px 3px 0 black;
-    transition: all 0.3s ease-in-out;
+    transform: rotate(-1deg);
 }
 
-.user-info button:hover {
-    background-color: #ff6f61;
-    transform: scale(1.05) rotate(-2deg);
-    animation: scribble 0.2s infinite alternate;
+#timer {
+    font-size: clamp(14px, 3vw, 18px);
+    font-weight: bold;
+    color: #ff6b6b;
+    font-family: 'Permanent Marker', cursive;
 }
 
-@keyframes scribble {
-    0% { transform: rotate(-3deg); }
-    50% { transform: rotate(3deg); }
-    100% { transform: rotate(-3deg); }
-}
-
-    #room-code {
-        font-weight: bold;
-        color: #4a4a4a;
-        font-family: 'Permanent Marker', cursive;
-    }
-
-    .game-container {
-        display: flex;
-        gap: 20px;
-        max-width: 1200px;
-        margin: 0 auto;
-        padding: 20px;
-    }
-    
-
-    
-
-.sidebar {
-    width: 300px;
-    background-color: #ffffff;
+/* Canvas - Scribble Style */
+.canvas-container {
+    background-color: #fff;
     border-radius: 10px;
-    box-shadow: -3px 3px 0px black, 3px -3px 0px black;
-    border: 2px solid black;
-    padding: 15px;
+    border: 3px solid #333;
+    box-shadow: 4px 4px 0 #4b74e0;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20"><path d="M0 0 Q5 5 10 0 T20 0" stroke="#ddd" stroke-width="1" fill="none"/></svg>');
+    background-repeat: repeat;
+    width: 100%;
+    max-width: 600px;
+    height: 400px;
+    overflow: hidden;
+}
+
+#drawing-board {
+    width: 100%;
+    height: 100%;
+    background-color: white;
+    cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20"><path d="M2 18 L18 2" stroke="#ff6f61" stroke-width="3" stroke-linecap="round"/></svg>'), auto;
+}
+
+/* Drawing Tools */
+.drawing-tools {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    background-color: #fef3c7;
+    border: 2px dashed #ff4081;
+    border-radius: 8px;
+}
+
+.color-picker {
+    display: flex;
+    gap: 8px;
+}
+
+.color-option {
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    border: 2px dashed #333;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.color-option:hover {
+    transform: scale(1.2) rotate(5deg);
+}
+
+.color-option.selected {
+    border: 3px solid #ff6f61;
+    box-shadow: 2px 2px 0 #4b74e0;
+}
+
+.brush-size {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+#brush-size {
+    width: 100px;
+}
+
+.brush-size span {
+    font-family: 'Permanent Marker', cursive;
+    color: #4a4a4a;
+}
+
+#clear-btn {
+    padding: 8px 12px;
+    background-color: #ff6b6b;
+    color: white;
+    border: 2px dashed #333;
+    border-radius: 5px;
+    font-family: 'Permanent Marker', cursive;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+#clear-btn:hover {
+    background-color: #ff4f4f;
+}
+
+/* Sidebar */
+.sidebar {
+    width: 250px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
 }
 
 .players, .chat {
-    padding: 15px;
-    font-family: 'Permanent Marker', cursive;
-    border: 2px solid black;
-    box-shadow: 2px 2px 0 black;
+    background-color: #fff;
+    border: 2px dashed #4b74e0;
+    border-radius: 10px;
+    padding: 10px;
 }
 
 .players h3, .chat h3 {
-    margin-bottom: 10px;
-    color: #4a4a4a;
-    font-size: 20px;
     font-family: 'Permanent Marker', cursive;
-    border-bottom: 3px dashed #4b74e0;
-    padding-bottom: 10px;
+    color: #4a4a4a;
+    font-size: 18px;
+    border-bottom: 2px wavy #ff6f61;
+    padding-bottom: 5px;
 }
 
 #players-list {
@@ -158,223 +229,94 @@ body {
 }
 
 #players-list li {
-    padding: 8px 0;
+    padding: 5px 0;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-bottom: 2px dashed #ff6b6b;
     font-family: 'Permanent Marker', cursive;
-    font-size: 16px;
+    font-size: 14px;
 }
 
 .player-name {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 5px;
 }
 
 .player-score {
     font-weight: bold;
     color: #ffca28;
-    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 .player-drawing {
     color: #ff6b6b;
-    font-weight: bold;
     text-decoration: wavy underline;
 }
 
+/* Chat - Scribble Style */
 #chat-messages {
-    width: 100%; /* Allow full width inside container */
-    max-width: 700px; /* Increase width */
-    height: 350px; /* Keep height balanced */
+    height: 200px;
     overflow-y: auto;
-    padding: 15px;
     background-color: #fef3c7;
+    border: 2px dashed #ff4081;
     border-radius: 10px;
-    margin-bottom: 10px;
-    border: 3px dashed #4b74e0;
-    font-family: 'Permanent Marker', cursive;
-    font-size: 16px;
-    display: flex;
-    flex-direction: column;
+    padding: 10px;
 }
 
-/* Ensure messages display properly */
 .chat-message {
-    padding: 8px 0;
+    padding: 5px;
+    margin: 5px 0;
+    background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="30" viewBox="0 0 100 30"><path d="M0 15 Q25 10 50 15 T100 15" stroke="#4b74e0" stroke-width="2" fill="none"/></svg>') no-repeat;
+    background-size: 100% 100%;
+    font-family: 'Permanent Marker', cursive;
+    color: #333;
     word-wrap: break-word;
-    line-height: 1.4;
 }
 
 .chat-message .username {
     font-weight: bold;
     color: #ff4081;
+    text-decoration: wavy underline;
 }
 
 .chat-message .correct-guess {
     color: #4caf50;
     font-weight: bold;
-    text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.1);
 }
 
-/* Chat input section */
 .chat-input {
     display: flex;
-    gap: 10px;
-    width: 100%;
-    max-width: 700px; /* Match chat messages width */
-    padding: 12px;
-    background: #fff;
-    border-radius: 10px;
+    gap: 5px;
+    margin-top: 10px;
 }
 
-/* Adjust input size */
 .chat-input input {
     flex-grow: 1;
-    padding: 12px 16px;
-    border: 2px dashed #ff4081;
-    border-radius: 10px;
-    font-size: 16px;
+    padding: 8px;
+    border: 2px dashed #4b74e0;
+    border-radius: 5px;
     font-family: 'Permanent Marker', cursive;
     background: #fff;
-    color: #333;
+    font-size: 14px;
     outline: none;
-    transition: transform 0.2s;
 }
 
-.chat-input input:focus {
-    transform: scale(1.03);
-}
-
-/* Send button */
 .chat-input button {
-    padding: 12px 18px;
+    padding: 8px 12px;
     background-color: #ff4081;
     color: white;
-    border: none;
-    border-radius: 10px;
-    cursor: pointer;
-    font-size: 16px;
-    font-family: 'Permanent Marker', cursive;
-    transition: all 0.3s ease;
-    border: 2px dashed #4b74e0;
-    flex-shrink: 0; /* Prevents button from shrinking */
-}
-
-/* Button hover effect */
-.chat-input button:hover {
-    background-color: #d81b60;
-    transform: scale(1.05);
-}
-
-/* Center chat container */
-.chat-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    max-width: 750px; /* Slightly larger than chat box */
-    margin: auto;
-}
-
-.main-area {
-    flex-grow: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-}
-
-.game-info {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 15px;
-    background-color: #ffffff;
-    border-radius: 10px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-}
-
-#word-display {
-    font-size: 24px;
-    font-weight: bold;
-    color: #4a4a4a;
-}
-
-#timer {
-    font-size: 18px;
-    font-weight: bold;
-    color: #ff6b6b;
-}
-
-.canvas-container {
-    background-color: #ffffff;
-    border-radius: 10px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    overflow: hidden;
-    height: 400px;
-}
-
-#drawing-board {
-    width: 100%;
-    height: 100%;
-    background-color: white;
-    cursor: crosshair;
-}
-
-.drawing-tools {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 15px;
-    background-color: #ffffff;
-    border-radius: 10px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-}
-
-.color-picker {
-    display: flex;
-    gap: 10px;
-}
-
-.color-option {
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    cursor: pointer;
-    border: 2px solid #ddd;
-    transition: transform 0.2s;
-}
-
-.color-option:hover {
-    transform: scale(1.1);
-}
-
-.color-option.selected {
-    border: 2px solid #333;
-}
-
-.brush-size {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-#clear-btn {
-    padding: 8px 16px;
-    background-color: #ff6b6b;
-    color: white;
-    border: none;
+    border: 2px dashed #333;
     border-radius: 5px;
+    font-family: 'Permanent Marker', cursive;
     cursor: pointer;
-    font-size: 14px;
     transition: background-color 0.3s;
 }
 
-#clear-btn:hover {
-    background-color: #ff4f4f;
+.chat-input button:hover {
+    background-color: #d81b60;
 }
 
+/* Welcome Screen */
 .welcome-screen {
     position: fixed;
     top: 0;
@@ -389,88 +331,81 @@ body {
 }
 
 .welcome-content {
-    background-color: #ffffff;
-    padding: 30px;
+    background-color: #fff;
+    padding: 20px;
     border-radius: 10px;
+    border: 2px dashed #4b74e0;
     text-align: center;
-    max-width: 500px;
-    width: 100%;
+    max-width: 90%;
+    box-shadow: 3px 3px 0 #ff6f61;
 }
 
 .welcome-content h2 {
+    font-family: 'Permanent Marker', cursive;
     color: #4a4a4a;
-    margin-bottom: 20px;
-    font-family: 'Fredoka', sans-serif;
-    font-size: 28px;
-    font-weight: 600;
-    text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
-    animation: bounceText 1s infinite alternate;
+    font-size: clamp(20px, 6vw, 28px);
+    margin-bottom: 15px;
 }
 
 .welcome-content p {
+    font-family: 'Permanent Marker', cursive;
     color: #666;
-    margin-bottom: 30px;
-    font-family: 'Fredoka', sans-serif;
-    font-size: 18px;
-    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
-    animation: fadeIn 1s ease-in-out;
+    font-size: clamp(14px, 4vw, 18px);
 }
 
-@keyframes bounceText {
-    0% { transform: translateY(0); }
-    50% { transform: translateY(-2px); }
-    100% { transform: translateY(0); }
+.username-section {
+    display: flex;
+    gap: 10px;
+    margin: 20px 0;
 }
 
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(5px); }
-    to { opacity: 1; transform: translateY(0); }
+#username {
+    flex: 1;
+    padding: 10px;
+    border: 2px dashed #4b74e0;
+    border-radius: 5px;
+    font-family: 'Permanent Marker', cursive;
+    font-size: 16px;
+}
+
+#submit-username-btn {
+    padding: 10px 15px;
+    background-color: #4b74e0;
+    color: white;
+    border: 2px dashed #333;
+    border-radius: 5px;
+    font-family: 'Permanent Marker', cursive;
+    cursor: pointer;
 }
 
 .game-options {
     display: flex;
-    justify-content: space-around;
-    gap: 20px;
-    padding: 20px;
+    flex-direction: column;
+    gap: 15px;
+    padding: 10px;
 }
 
 .option {
-    flex: 1;
-    padding: 15px;
+    padding: 10px;
     background-color: #fdfdfd;
-    border-radius: 10px;
-    box-shadow: 4px 4px 0px #4b74e0, -4px -4px 0px #ff6f61;
-    transition: transform 0.2s, box-shadow 0.2s;
-    font-family: 'Poppins', sans-serif;
-}
-
-.option:hover {
-    transform: translateY(-5px);
-    box-shadow: 6px 6px 0px #4b74e0, -6px -6px 0px #ff6f61;
+    border: 2px dashed #ff6f61;
+    border-radius: 8px;
 }
 
 .option h3 {
-    margin-bottom: 15px;
+    font-family: 'Permanent Marker', cursive;
     color: #4a4a4a;
-    font-size: 20px;
-    font-weight: 600;
-    text-align: center;
+    font-size: 18px;
+    margin-bottom: 10px;
 }
 
 .option input {
     width: 100%;
     padding: 10px;
-    border: 2px solid #4b74e0;
+    border: 2px dashed #4b74e0;
     border-radius: 5px;
+    font-family: 'Permanent Marker', cursive;
     font-size: 14px;
-    margin-bottom: 10px;
-    transition: border-color 0.3s, box-shadow 0.3s;
-    font-family: 'Poppins', sans-serif;
-}
-
-.option input:focus {
-    border-color: #ff6f61;
-    box-shadow: 0 0 8px rgba(255, 111, 97, 0.5);
 }
 
 .option button {
@@ -478,30 +413,13 @@ body {
     padding: 10px;
     background-color: #4b74e0;
     color: white;
-    border: none;
+    border: 2px dashed #333;
     border-radius: 5px;
+    font-family: 'Permanent Marker', cursive;
     cursor: pointer;
-    font-size: 14px;
-    font-weight: 600;
-    transition: background-color 0.3s, transform 0.2s;
-    font-family: 'Poppins', sans-serif;
 }
 
-.option button:hover {
-    background-color: #ff6f61;
-    animation: shaky 0.2s infinite alternate;
-}
-
-.option button:active {
-    transform: scale(0.95);
-}
-
-@keyframes shaky {
-    0% { transform: rotate(-2deg); }
-    50% { transform: rotate(2deg); }
-    100% { transform: rotate(-2deg); }
-}
-
+/* Round Transition */
 .round-transition {
     position: fixed;
     top: 0;
@@ -515,146 +433,130 @@ body {
     align-items: center;
     z-index: 1000;
     color: white;
-    text-align: center;
+    font-family: 'Permanent Marker', cursive;
 }
 
 .round-transition h2 {
-    font-size: 32px;
-    margin-bottom: 20px;
+    font-size: clamp(24px, 6vw, 32px);
+    margin-bottom: 15px;
 }
 
 #word-reveal {
-    font-size: 24px;
-    margin-bottom: 20px;
+    font-size: clamp(18px, 5vw, 24px);
+    margin-bottom: 15px;
 }
 
 #scores-update {
-    font-size: 18px;
+    font-size: clamp(14px, 4vw, 18px);
+}
+
+/* Responsiveness */
+@media (max-width: 768px) {
+    .game-container {
+        flex-direction: column;
+        padding: 5px;
+    }
+
+    .sidebar {
+        width: 100%;
+        order: 1; /* Move below main-area */
+    }
+
+    .main-area {
+        order: 0;
+    }
+
+    .canvas-container {
+        max-width: 100%;
+        height: 300px; /* Smaller height on mobile */
+    }
+
+    .drawing-tools {
+        flex-wrap: wrap;
+        gap: 10px;
+        justify-content: center;
+    }
+
+    .color-picker {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .brush-size {
+        width: 100%;
+        justify-content: center;
+    }
+
+    #brush-size {
+        width: 80%;
+    }
+
+    .header {
+        flex-direction: column;
+        text-align: center;
+        padding: 8px;
+    }
+
+    .user-info {
+        margin-top: 10px;
+    }
+
+    .game-options {
+        padding: 5px;
+    }
+
+    .option {
+        width: 100%;
+    }
+
+    #chat-messages {
+        height: 150px;
+    }
+
+    .chat-input {
+        flex-direction: column;
+    }
+
+    .chat-input input {
+        width: 100%;
+    }
+
+    .chat-input button {
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .canvas-container {
+        height: 250px; /* Even smaller for very small screens */
+    }
+
+    #chat-messages {
+        height: 120px;
+    }
+
+    .color-option {
+        width: 20px;
+        height: 20px;
+    }
 }
 
 .hidden {
     display: none;
 }
 
-.username-section {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 10px;
-    margin: 20px auto;
-    max-width: 400px;
-    opacity: 0;
-    transform: scale(0.5) translateY(-50px);
-    animation: pop-in 0.6s cubic-bezier(0.23, 1.4, 0.32, 1) forwards;
-}
-
-@keyframes pop-in {
-    0% {
-        opacity: 0;
-        transform: scale(0.5) translateY(-50px);
-    }
-    50% {
-        opacity: 1;
-        transform: scale(1.1);
-    }
-    100% {
-        opacity: 1;
-        transform: scale(1);
-    }
-}
-
-#username {
-    flex: 1;
-    padding: 10px;
-    border: 2px solid #4b74e0;
-    border-radius: 8px;
-    outline: none;
-    font-size: 16px;
-    font-family: 'Permanent Marker', cursive;
-    background: #fdfdfd;
-    box-shadow: 2px 2px 0 #4b74e0;
-    transition: all 0.3s ease-in-out;
-}
-
-#username:hover {
-    box-shadow: 0px 0px 10px rgba(75, 116, 224, 0.8);
-}
-
-#username:focus {
-    border-color: #ff6f61;
-    box-shadow: 0px 0px 15px rgba(255, 111, 97, 0.9);
-    animation: wave 0.4s ease-in-out;
-}
-
-@keyframes wave {
-    0%, 100% { transform: rotate(0); }
-    25% { transform: rotate(2deg); }
-    50% { transform: rotate(-2deg); }
-    75% { transform: rotate(1deg); }
-}
-
-#submit-username-btn {
-    background-color: #4b74e0;
-    color: white;
-    border: none;
-    padding: 10px 15px;
-    font-size: 16px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-family: 'Permanent Marker', cursive;
-    box-shadow: 2px 2px 0 #2c3e50;
-    transition: transform 0.2s ease-out;
-}
-
-#submit-username-btn:hover {
-    background-color: #ff6f61;
-    transform: scale(1.05) rotate(-3deg);
-    animation: scribble 0.2s infinite alternate;
-}
-
+/* Animations */
 @keyframes scribble {
     0% { transform: rotate(-2deg); }
     50% { transform: rotate(2deg); }
     100% { transform: rotate(-2deg); }
 }
 
-#submit-username-btn:active {
-    transform: scale(0.95);
-    box-shadow: none;
-}
-
 @keyframes fadeOut {
-    0% {
-        opacity: 1;
-        transform: scale(1);
-    }
-    50% {
-        opacity: 0.5;
-        transform: scale(0.8);
-    }
-    100% {
-        opacity: 0;
-        transform: scale(0);
-        display: none;
-    }
-}
-
-@keyframes success-bounce {
-    0% {
-        transform: scale(1);
-    }
-    50% {
-        transform: scale(1.3);
-    }
-    100% {
-        transform: scale(1);
-    }
+    0% { opacity: 1; transform: scale(1); }
+    100% { opacity: 0; transform: scale(0); }
 }
 
 .fade-out {
     animation: fadeOut 0.6s forwards;
-}
-
-.success-bounce {
-    animation: none;
 }

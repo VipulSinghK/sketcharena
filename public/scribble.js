@@ -25,6 +25,7 @@ const ctx = canvas.getContext('2d', { willReadFrequently: true });
 const colorOptions = document.querySelectorAll('.color-option');
 const brushSizeInput = document.getElementById('brush-size');
 const clearBtn = document.getElementById('clear-btn');
+const eraserBtn = document.getElementById('eraser-btn'); // Now in HTML
 const roundMessage = document.getElementById('round-message');
 const wordReveal = document.getElementById('word-reveal');
 const scoresUpdate = document.getElementById('scores-update');
@@ -32,70 +33,112 @@ const roundTransition = document.querySelector('.round-transition');
 
 const adminControlsContainer = document.createElement('div');
 adminControlsContainer.className = 'admin-controls';
-
 const startGameBtn = document.createElement('button');
 startGameBtn.id = 'start-game-btn';
 startGameBtn.textContent = 'Start Game';
 startGameBtn.classList.add('game-button');
 startGameBtn.style.display = 'none';
-
+const roundsSelect = document.createElement('select');
+roundsSelect.id = 'rounds-select';
+roundsSelect.style.display = 'none';
+[3, 5, 7].forEach(num => {
+    const option = document.createElement('option');
+    option.value = num;
+    option.textContent = `${num} Rounds`;
+    roundsSelect.appendChild(option);
+});
 adminControlsContainer.appendChild(startGameBtn);
+adminControlsContainer.appendChild(roundsSelect);
 
 let currentColor = '#000000';
 let currentBrushSize = 5;
 let isDrawing = false;
 let isDrawer = false;
 let isAdmin = false;
+let isErasing = false;
 let currentRoom = null;
 let username = '';
 let lastX = 0;
 let lastY = 0;
+let canvasData = null;
 
 function setupCanvas() {
     const canvasContainer = document.querySelector('.canvas-container');
-    if (canvasContainer) {
-        canvas.width = canvasContainer.offsetWidth;
-        canvas.height = canvasContainer.offsetHeight;
-        ctx.lineCap = 'round';
-        ctx.lineJoin = 'round';
-        console.log(`Canvas initialized with size: ${canvas.width}x${canvas.height}`);
-    } else {
-        console.error('Canvas container not found');
+    if (!canvasContainer || !canvas) return;
+    const width = Math.max(canvasContainer.offsetWidth || 300, 1);
+    const height = Math.max(canvasContainer.offsetHeight || 300, 1);
+    canvas.width = width;
+    canvas.height = height;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    if (!canvas.dataset.initialized) {
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        canvas.dataset.initialized = 'true';
     }
 }
 
+function saveCanvas() {
+    if (canvas.width > 0 && canvas.height > 0) {
+        canvasData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    }
+}
+
+function restoreCanvas() {
+    if (canvasData && canvas.width > 0 && canvas.height > 0) {
+        ctx.putImageData(canvasData, 0, 0);
+    }
+}
+
+function debounce(func, wait) {
+    let timeout;
+    return function (...args) {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => func.apply(this, args), wait);
+    };
+}
+
 function init() {
-    setupCanvas();
+    if (!document.querySelector('.canvas-container') || !canvas) {
+        setTimeout(init, 100);
+        return;
+    }
     setupEventListeners();
-    window.addEventListener('resize', setupCanvas);
+    window.addEventListener('resize', debounce(() => {
+        const canvasContainer = document.querySelector('.canvas-container');
+        const newWidth = Math.max(canvasContainer.offsetWidth || 300, 1);
+        const newHeight = Math.max(canvasContainer.offsetHeight || 300, 1);
+        if (newWidth !== canvas.width || newHeight !== canvas.height) {
+            saveCanvas();
+            canvas.width = newWidth;
+            canvas.height = newHeight;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            restoreCanvas();
+        }
+    }, 200));
     const header = document.querySelector('.header');
     if (header) header.appendChild(adminControlsContainer);
-    console.log('Init complete');
 }
 
 function sendDrawPoint(x0, y0, x1, y1) {
     const drawId = Date.now() + Math.random().toString(36).substring(2, 5);
-    console.log(`Sending draw point ID:${drawId} at ${Date.now()}`);
     socket.emit('draw', {
         drawId: drawId,
         points: [{ x0, y0, x1, y1 }],
-        color: currentColor,
+        color: isErasing ? '#ffffff' : currentColor,
         size: currentBrushSize
     });
 }
 
 function setupEventListeners() {
-    if (!submitUsernameBtn) {
-        console.error('Submit button not found in DOM');
-        return;
-    }
+    if (!submitUsernameBtn) return;
     submitUsernameBtn.addEventListener('click', submitUsername);
-    console.log('Submit button listener attached');
-
     createRoomBtn.addEventListener('click', createRoom);
     joinRoomBtn.addEventListener('click', joinRoom);
     startGameBtn.addEventListener('click', startGame);
 
+    if (!canvas) return;
     canvas.addEventListener('mousedown', startDrawing);
     canvas.addEventListener('mousemove', draw);
     canvas.addEventListener('mouseup', stopDrawing);
@@ -109,6 +152,8 @@ function setupEventListeners() {
             colorOptions.forEach(opt => opt.classList.remove('selected'));
             option.classList.add('selected');
             currentColor = option.dataset.color;
+            isErasing = false;
+            eraserBtn.classList.remove('active');
         });
     });
 
@@ -117,17 +162,25 @@ function setupEventListeners() {
     });
 
     clearBtn.addEventListener('click', clearCanvas);
+    eraserBtn.addEventListener('click', () => {
+        isErasing = !isErasing;
+        eraserBtn.classList.toggle('active', isErasing);
+        if (isErasing) {
+            colorOptions.forEach(opt => opt.classList.remove('selected'));
+        } else {
+            colorOptions[0].classList.add('selected'); // Default to black when switching back
+        }
+    });
 
     sendBtn.addEventListener('click', sendMessage);
     chatInput.addEventListener('keypress', event => {
         if (event.key === 'Enter') sendMessage();
     });
 
-    colorOptions[0]?.classList.add('selected');
+    if (colorOptions.length > 0) colorOptions[0].classList.add('selected');
 }
 
 function submitUsername() {
-    console.log('submitUsername called');
     const enteredUsername = usernameInput.value.trim();
     if (!enteredUsername) {
         alert('Please enter a username');
@@ -137,8 +190,6 @@ function submitUsername() {
     usernameSection.classList.add('hidden');
     gameOptions.classList.remove('hidden');
     usernameDisplay.textContent = username;
-    const welcomeBox = document.getElementById('welcome-box');
-    if (welcomeBox) welcomeBox.classList.add('fade-out');
 }
 
 function createRoom() {
@@ -156,15 +207,15 @@ function joinRoom() {
 
 function startGame() {
     if (isAdmin) {
-        socket.emit('start-game');
+        const totalRounds = parseInt(roundsSelect.value) || 3;
+        socket.emit('start-game', { totalRounds });
         startGameBtn.style.display = 'none';
+        roundsSelect.style.display = 'none';
     }
 }
 
 function kickPlayer(playerId) {
-    if (isAdmin) {
-        socket.emit('kick-player', { playerId });
-    }
+    if (isAdmin) socket.emit('kick-player', { playerId });
 }
 
 function startDrawing(e) {
@@ -173,6 +224,8 @@ function startDrawing(e) {
     const rect = canvas.getBoundingClientRect();
     lastX = e.clientX - rect.left;
     lastY = e.clientY - rect.top;
+    ctx.beginPath();
+    ctx.moveTo(lastX, lastY);
     sendDrawPoint(lastX / canvas.width, lastY / canvas.height, lastX / canvas.width, lastY / canvas.height);
 }
 
@@ -182,10 +235,8 @@ function draw(e) {
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
 
-    ctx.strokeStyle = currentColor;
+    ctx.strokeStyle = isErasing ? '#ffffff' : currentColor;
     ctx.lineWidth = currentBrushSize;
-    ctx.beginPath();
-    ctx.moveTo(lastX, lastY);
     ctx.lineTo(x, y);
     ctx.stroke();
 
@@ -203,6 +254,8 @@ function handleTouchStart(e) {
     isDrawing = true;
     lastX = touch.clientX - rect.left;
     lastY = touch.clientY - rect.top;
+    ctx.beginPath();
+    ctx.moveTo(lastX, lastY);
     sendDrawPoint(lastX / canvas.width, lastY / canvas.height, lastX / canvas.width, lastY / canvas.height);
 }
 
@@ -214,10 +267,8 @@ function handleTouchMove(e) {
     const x = touch.clientX - rect.left;
     const y = touch.clientY - rect.top;
 
-    ctx.strokeStyle = currentColor;
+    ctx.strokeStyle = isErasing ? '#ffffff' : currentColor;
     ctx.lineWidth = currentBrushSize;
-    ctx.beginPath();
-    ctx.moveTo(lastX, lastY);
     ctx.lineTo(x, y);
     ctx.stroke();
 
@@ -228,7 +279,9 @@ function handleTouchMove(e) {
 }
 
 function stopDrawing() {
-    isDrawing = false;
+    if (isDrawing) {
+        isDrawing = false;
+    }
 }
 
 function clearCanvas() {
@@ -299,13 +352,19 @@ function addChatMessage(data) {
     chatMessages.scrollTop = chatMessages.scrollHeight;
 }
 
+socket.on('connect', () => {});
+
 socket.on('room-created', data => {
     currentRoom = data.roomId;
     isAdmin = data.isAdmin;
     roomCodeDisplay.textContent = `Room Code: ${data.roomId}`;
     welcomeScreen.classList.add('hidden');
     gameContainer.classList.remove('hidden');
-    if (isAdmin) startGameBtn.style.display = 'block';
+    setupCanvas();
+    if (isAdmin) {
+        startGameBtn.style.display = 'block';
+        roundsSelect.style.display = 'block';
+    }
 });
 
 socket.on('room-joined', data => {
@@ -314,8 +373,12 @@ socket.on('room-joined', data => {
     roomCodeDisplay.textContent = `Room Code: ${data.roomId}`;
     welcomeScreen.classList.add('hidden');
     gameContainer.classList.remove('hidden');
+    setupCanvas();
     updatePlayersList(data.players);
-    if (isAdmin && data.players.length >= MIN_PLAYERS) startGameBtn.style.display = 'block';
+    if (isAdmin && data.players.length >= 2) {
+        startGameBtn.style.display = 'block';
+        roundsSelect.style.display = 'block';
+    }
 });
 
 socket.on('join-error', data => alert(data.message));
@@ -323,7 +386,10 @@ socket.on('error', data => alert(data.message));
 socket.on('update-players', data => updatePlayersList(data.players));
 socket.on('chat-message', data => addChatMessage(data));
 socket.on('can-start-game', data => {
-    if (isAdmin && data) startGameBtn.style.display = 'block';
+    if (isAdmin && data) {
+        startGameBtn.style.display = 'block';
+        roundsSelect.style.display = 'block';
+    }
 });
 
 socket.on('round-start', data => {
@@ -341,7 +407,6 @@ socket.on('game-state', data => {
 
 socket.on('draw', data => {
     if (!isDrawer) {
-        console.log(`Received draw points ID:${data.drawId} at ${Date.now()}`);
         data.points.forEach(point => {
             ctx.strokeStyle = data.color;
             ctx.lineWidth = data.size;
@@ -350,12 +415,13 @@ socket.on('draw', data => {
             ctx.lineTo(point.x1 * canvas.width, point.y1 * canvas.height);
             ctx.stroke();
         });
-        console.log(`Rendered draw points ID:${data.drawId} at ${Date.now()}`);
     }
 });
 
 socket.on('clear-canvas', () => {
-    if (!isDrawer) ctx.clearRect(0, 0, canvas.width, canvas.height);
+    if (!isDrawer) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
 });
 
 socket.on('round-end', data => {
@@ -373,12 +439,30 @@ socket.on('round-end', data => {
 
 socket.on('game-end', data => {
     roundTransition.innerHTML = `
-        <h2>Game Over!</h2>
-        <p>Winner: ${data.winner.username} with ${data.winner.score} points</p>
-        <ul>${data.scores.map(score => `<li>${score.username}: ${score.score}</li>`).join('')}</ul>
+        <div class="game-over">
+            <h2>Game Over! 🎉</h2>
+            <p class="winner">Winner: <span>${data.winner.username}</span> with ${data.winner.score} points!</p>
+            <div class="scoreboard">
+                <h3>Final Scores</h3>
+                <ul>${data.scores.map(score => `
+                    <li class="${score.username === data.winner.username ? 'winner-score' : ''}">
+                        ${score.username}: ${score.score}
+                    </li>`).join('')}
+                </ul>
+            </div>
+            <button id="play-again-btn">Play Again</button>
+        </div>
     `;
     roundTransition.classList.remove('hidden');
-    setTimeout(() => roundTransition.classList.add('hidden'), 10000);
+    setTimeout(() => {
+        document.getElementById('play-again-btn').addEventListener('click', () => {
+            roundTransition.classList.add('hidden');
+            if (isAdmin) {
+                startGameBtn.style.display = 'block';
+                roundsSelect.style.display = 'block';
+            }
+        });
+    }, 100);
 });
 
 socket.on('room-reset', () => {
@@ -390,6 +474,9 @@ socket.on('room-reset', () => {
     scoresUpdate.classList.add('hidden');
     roundTransition.classList.add('hidden');
     startGameBtn.style.display = isAdmin ? 'block' : 'none';
+    roundsSelect.style.display = isAdmin ? 'block' : 'none';
+    isErasing = false;
+    eraserBtn.classList.remove('active');
 });
 
 socket.on('kicked', data => {
@@ -399,7 +486,10 @@ socket.on('kicked', data => {
 
 socket.on('admin-assigned', data => {
     isAdmin = data.isAdmin;
-    if (isAdmin) startGameBtn.style.display = 'block';
+    if (isAdmin) {
+        startGameBtn.style.display = 'block';
+        roundsSelect.style.display = 'block';
+    }
 });
 
-init();
+document.addEventListener('DOMContentLoaded', init);
