@@ -25,7 +25,6 @@ const ctx = canvas.getContext('2d', { willReadFrequently: true });
 const colorOptions = document.querySelectorAll('.color-option');
 const brushSizeInput = document.getElementById('brush-size');
 const clearBtn = document.getElementById('clear-btn');
-const eraserBtn = document.getElementById('eraser-btn'); // Now in HTML
 const roundMessage = document.getElementById('round-message');
 const wordReveal = document.getElementById('word-reveal');
 const scoresUpdate = document.getElementById('scores-update');
@@ -38,24 +37,13 @@ startGameBtn.id = 'start-game-btn';
 startGameBtn.textContent = 'Start Game';
 startGameBtn.classList.add('game-button');
 startGameBtn.style.display = 'none';
-const roundsSelect = document.createElement('select');
-roundsSelect.id = 'rounds-select';
-roundsSelect.style.display = 'none';
-[3, 5, 7].forEach(num => {
-    const option = document.createElement('option');
-    option.value = num;
-    option.textContent = `${num} Rounds`;
-    roundsSelect.appendChild(option);
-});
 adminControlsContainer.appendChild(startGameBtn);
-adminControlsContainer.appendChild(roundsSelect);
 
 let currentColor = '#000000';
 let currentBrushSize = 5;
 let isDrawing = false;
 let isDrawer = false;
 let isAdmin = false;
-let isErasing = false;
 let currentRoom = null;
 let username = '';
 let lastX = 0;
@@ -65,7 +53,7 @@ let canvasData = null;
 function setupCanvas() {
     const canvasContainer = document.querySelector('.canvas-container');
     if (!canvasContainer || !canvas) return;
-    const width = Math.max(canvasContainer.offsetWidth || 300, 1);
+    const width = Math.max(canvasContainer.offsetWidth || 300, 1); // Mobile-friendly fallback
     const height = Math.max(canvasContainer.offsetHeight || 300, 1);
     canvas.width = width;
     canvas.height = height;
@@ -100,13 +88,13 @@ function debounce(func, wait) {
 
 function init() {
     if (!document.querySelector('.canvas-container') || !canvas) {
-        setTimeout(init, 100);
+        setTimeout(init, 100); // Retry if DOM isn't ready
         return;
     }
     setupEventListeners();
     window.addEventListener('resize', debounce(() => {
         const canvasContainer = document.querySelector('.canvas-container');
-        const newWidth = Math.max(canvasContainer.offsetWidth || 300, 1);
+        const newWidth = Math.max(canvasContainer.offsetWidth || 300, 1); // Match setupCanvas fallback
         const newHeight = Math.max(canvasContainer.offsetHeight || 300, 1);
         if (newWidth !== canvas.width || newHeight !== canvas.height) {
             saveCanvas();
@@ -126,7 +114,7 @@ function sendDrawPoint(x0, y0, x1, y1) {
     socket.emit('draw', {
         drawId: drawId,
         points: [{ x0, y0, x1, y1 }],
-        color: isErasing ? '#ffffff' : currentColor,
+        color: currentColor,
         size: currentBrushSize
     });
 }
@@ -152,8 +140,6 @@ function setupEventListeners() {
             colorOptions.forEach(opt => opt.classList.remove('selected'));
             option.classList.add('selected');
             currentColor = option.dataset.color;
-            isErasing = false;
-            eraserBtn.classList.remove('active');
         });
     });
 
@@ -162,16 +148,6 @@ function setupEventListeners() {
     });
 
     clearBtn.addEventListener('click', clearCanvas);
-    eraserBtn.addEventListener('click', () => {
-        isErasing = !isErasing;
-        eraserBtn.classList.toggle('active', isErasing);
-        if (isErasing) {
-            colorOptions.forEach(opt => opt.classList.remove('selected'));
-        } else {
-            colorOptions[0].classList.add('selected'); // Default to black when switching back
-        }
-    });
-
     sendBtn.addEventListener('click', sendMessage);
     chatInput.addEventListener('keypress', event => {
         if (event.key === 'Enter') sendMessage();
@@ -207,10 +183,8 @@ function joinRoom() {
 
 function startGame() {
     if (isAdmin) {
-        const totalRounds = parseInt(roundsSelect.value) || 3;
-        socket.emit('start-game', { totalRounds });
+        socket.emit('start-game');
         startGameBtn.style.display = 'none';
-        roundsSelect.style.display = 'none';
     }
 }
 
@@ -235,7 +209,7 @@ function draw(e) {
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
 
-    ctx.strokeStyle = isErasing ? '#ffffff' : currentColor;
+    ctx.strokeStyle = currentColor;
     ctx.lineWidth = currentBrushSize;
     ctx.lineTo(x, y);
     ctx.stroke();
@@ -267,7 +241,7 @@ function handleTouchMove(e) {
     const x = touch.clientX - rect.left;
     const y = touch.clientY - rect.top;
 
-    ctx.strokeStyle = isErasing ? '#ffffff' : currentColor;
+    ctx.strokeStyle = currentColor;
     ctx.lineWidth = currentBrushSize;
     ctx.lineTo(x, y);
     ctx.stroke();
@@ -360,11 +334,8 @@ socket.on('room-created', data => {
     roomCodeDisplay.textContent = `Room Code: ${data.roomId}`;
     welcomeScreen.classList.add('hidden');
     gameContainer.classList.remove('hidden');
-    setupCanvas();
-    if (isAdmin) {
-        startGameBtn.style.display = 'block';
-        roundsSelect.style.display = 'block';
-    }
+    setupCanvas(); // Initialize canvas when container is visible
+    if (isAdmin) startGameBtn.style.display = 'block';
 });
 
 socket.on('room-joined', data => {
@@ -373,12 +344,9 @@ socket.on('room-joined', data => {
     roomCodeDisplay.textContent = `Room Code: ${data.roomId}`;
     welcomeScreen.classList.add('hidden');
     gameContainer.classList.remove('hidden');
-    setupCanvas();
+    setupCanvas(); // Initialize canvas when container is visible
     updatePlayersList(data.players);
-    if (isAdmin && data.players.length >= 2) {
-        startGameBtn.style.display = 'block';
-        roundsSelect.style.display = 'block';
-    }
+    if (isAdmin && data.players.length >= 2) startGameBtn.style.display = 'block';
 });
 
 socket.on('join-error', data => alert(data.message));
@@ -386,10 +354,7 @@ socket.on('error', data => alert(data.message));
 socket.on('update-players', data => updatePlayersList(data.players));
 socket.on('chat-message', data => addChatMessage(data));
 socket.on('can-start-game', data => {
-    if (isAdmin && data) {
-        startGameBtn.style.display = 'block';
-        roundsSelect.style.display = 'block';
-    }
+    if (isAdmin && data) startGameBtn.style.display = 'block';
 });
 
 socket.on('round-start', data => {
@@ -439,30 +404,12 @@ socket.on('round-end', data => {
 
 socket.on('game-end', data => {
     roundTransition.innerHTML = `
-        <div class="game-over">
-            <h2>Game Over! 🎉</h2>
-            <p class="winner">Winner: <span>${data.winner.username}</span> with ${data.winner.score} points!</p>
-            <div class="scoreboard">
-                <h3>Final Scores</h3>
-                <ul>${data.scores.map(score => `
-                    <li class="${score.username === data.winner.username ? 'winner-score' : ''}">
-                        ${score.username}: ${score.score}
-                    </li>`).join('')}
-                </ul>
-            </div>
-            <button id="play-again-btn">Play Again</button>
-        </div>
+        <h2>Game Over!</h2>
+        <p>Winner: ${data.winner.username} with ${data.winner.score} points</p>
+        <ul>${data.scores.map(score => `<li>${score.username}: ${score.score}</li>`).join('')}</ul>
     `;
     roundTransition.classList.remove('hidden');
-    setTimeout(() => {
-        document.getElementById('play-again-btn').addEventListener('click', () => {
-            roundTransition.classList.add('hidden');
-            if (isAdmin) {
-                startGameBtn.style.display = 'block';
-                roundsSelect.style.display = 'block';
-            }
-        });
-    }, 100);
+    setTimeout(() => roundTransition.classList.add('hidden'), 10000);
 });
 
 socket.on('room-reset', () => {
@@ -474,9 +421,6 @@ socket.on('room-reset', () => {
     scoresUpdate.classList.add('hidden');
     roundTransition.classList.add('hidden');
     startGameBtn.style.display = isAdmin ? 'block' : 'none';
-    roundsSelect.style.display = isAdmin ? 'block' : 'none';
-    isErasing = false;
-    eraserBtn.classList.remove('active');
 });
 
 socket.on('kicked', data => {
@@ -486,10 +430,7 @@ socket.on('kicked', data => {
 
 socket.on('admin-assigned', data => {
     isAdmin = data.isAdmin;
-    if (isAdmin) {
-        startGameBtn.style.display = 'block';
-        roundsSelect.style.display = 'block';
-    }
+    if (isAdmin) startGameBtn.style.display = 'block';
 });
 
 document.addEventListener('DOMContentLoaded', init);

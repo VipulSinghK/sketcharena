@@ -13,40 +13,31 @@ body {
 .container {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 10px; /* Reduced padding for mobile */
+    padding: 10px;
 }
 
-/* Header - Scribble Style */
+/* Header - Vertical Flexbox Structure, Slightly Bigger */
 .header {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 15px;
+    flex-direction: column; /* Stack elements vertically */
+    align-items: center; /* Center everything horizontally */
+    padding: 15px; /* Increased padding for a bigger feel */
     background-color: #fff;
-    border-radius: 10px;
-    box-shadow: 3px 3px 0 #4b74e0, -3px -3px 0 #ff6f61;
-    border: 2px dashed #333;
-    position: relative;
+    border-radius: 8px;
+    box-shadow: 2px 2px 0 #4b74e0, -2px -2px 0 #ff6f61;
+    border: 2px solid #333;
     margin-bottom: 15px;
+    gap: 8px; /* Increased gap for better spacing */
+    max-height: 150px; /* Made slightly bigger */
 }
 
 .header h1 {
     color: #4a4a4a;
-    font-size: clamp(20px, 5vw, 28px); /* Responsive font size */
+    font-size: clamp(18px, 3.5vw, 24px); /* Slightly larger font */
     font-family: 'Permanent Marker', cursive;
-    text-shadow: 2px 2px 0 #4b74e0;
-    transform: rotate(-2deg);
-}
-
-.header h1::after {
-    content: '';
-    position: absolute;
-    bottom: 5px;
-    left: 10px;
-    width: 90%;
-    height: 4px;
-    background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 10"><path d="M0 5 Q25 2 50 5 T100 5" stroke="#ff6f61" stroke-width="2" fill="none"/></svg>') repeat-x;
-    background-size: 50px 10px;
+    text-shadow: 1px 1px 0 #4b74e0;
+    margin: 0;
+    text-align: center; /* Systematic alignment */
 }
 
 .header h1:hover {
@@ -54,10 +45,10 @@ body {
 }
 
 @keyframes wobble {
-    0%, 100% { transform: rotate(-2deg); }
-    25% { transform: rotate(0deg); }
-    50% { transform: rotate(-3deg); }
-    75% { transform: rotate(-1deg); }
+    0%, 100% { transform: rotate(0deg); }
+    25% { transform: rotate(2deg); }
+    50% { transform: rotate(-2deg); }
+    75% { transform: rotate(1deg); }
 }
 
 .user-info {
@@ -65,13 +56,19 @@ body {
     align-items: center;
     gap: 5px;
     font-family: 'Permanent Marker', cursive;
-    font-size: clamp(12px, 3vw, 14px);
+    font-size: clamp(12px, 2.5vw, 14px); /* Slightly larger font */
+    justify-content: center; /* Systematic alignment */
 }
 
 #room-code {
     font-weight: bold;
     color: #ff4081;
     text-decoration: wavy underline;
+}
+
+.admin-controls {
+    display: flex;
+    justify-content: center; /* Systematic alignment */
 }
 
 /* Game Container */
@@ -90,53 +87,7 @@ body {
     gap: 10px;
 }
 
-.game-info {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px;
-    background-color: #fef3c7;
-    border: 2px dashed #4b74e0;
-    border-radius: 8px;
-}
-
-#word-display {
-    font-size: clamp(18px, 4vw, 24px);
-    font-weight: bold;
-    color: #4a4a4a;
-    font-family: 'Permanent Marker', cursive;
-    transform: rotate(-1deg);
-}
-
-#timer {
-    font-size: clamp(14px, 3vw, 18px);
-    font-weight: bold;
-    color: #ff6b6b;
-    font-family: 'Permanent Marker', cursive;
-}
-
-/* Canvas - Scribble Style */
-.canvas-container {
-    background-color: #fff;
-    border-radius: 10px;
-    border: 3px solid #333;
-    box-shadow: 4px 4px 0 #4b74e0;
-    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20"><path d="M0 0 Q5 5 10 0 T20 0" stroke="#ddd" stroke-width="1" fill="none"/></svg>');
-    background-repeat: repeat;
-    width: 100%;
-    max-width: 600px;
-    height: 400px;
-    overflow: hidden;
-}
-
-#drawing-board {
-    width: 100%;
-    height: 100%;
-    background-color: white;
-    cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20"><path d="M2 18 L18 2" stroke="#ff6f61" stroke-width="3" stroke-linecap="round"/></svg>'), auto;
-}
-
-/* Drawing Tools */
+/* Drawing Tools - Expanded Color Palette */
 .drawing-tools {
     display: flex;
     justify-content: space-between;
@@ -150,6 +101,8 @@ body {
 .color-picker {
     display: flex;
     gap: 8px;
+    flex-wrap: wrap; /* Allow wrapping if needed */
+    justify-content: center; /* Systematic alignment */
 }
 
 .color-option {
@@ -200,6 +153,52 @@ body {
     background-color: #ff4f4f;
 }
 
+.game-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    background-color: #fef3c7;
+    border: 2px dashed #4b74e0;
+    border-radius: 8px;
+}
+
+#word-display {
+    font-size: clamp(18px, 4vw, 24px);
+    font-weight: bold;
+    color: #4a4a4a;
+    font-family: 'Permanent Marker', cursive;
+    transform: rotate(-1deg);
+}
+
+#timer {
+    font-size: clamp(14px, 3vw, 18px);
+    font-weight: bold;
+    color: #ff6b6b;
+    font-family: 'Permanent Marker', cursive;
+}
+
+/* Canvas - Scribble Style */
+.canvas-container {
+    background-color: #fff;
+    border-radius: 10px;
+    border: 3px solid #333;
+    box-shadow: 4px 4px 0 #4b74e0;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20"><path d="M0 0 Q5 5 10 0 T20 0" stroke="#ddd" stroke-width="1" fill="none"/></svg>');
+    background-repeat: repeat;
+    width: 100%;
+    max-width: 600px;
+    height: 400px;
+    overflow: hidden;
+}
+
+#drawing-board {
+    width: 100%;
+    height: 100%;
+    background-color: white;
+    cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20"><path d="M2 18 L18 2" stroke="#ff6f61" stroke-width="3" stroke-linecap="round"/></svg>'), auto;
+}
+
 /* Sidebar */
 .sidebar {
     width: 250px;
@@ -213,6 +212,7 @@ body {
     border: 2px dashed #4b74e0;
     border-radius: 10px;
     padding: 10px;
+    overflow: hidden; /* Prevent overflow of children */
 }
 
 .players h3, .chat h3 {
@@ -286,12 +286,16 @@ body {
 
 .chat-input {
     display: flex;
+    flex-direction: row; /* Keep input and button side-by-side on desktop */
+    align-items: center; /* Vertically align input and button */
     gap: 5px;
     margin-top: 10px;
+    width: 100%; /* Ensure it fits within parent */
+    max-width: 100%; /* Prevent overflow */
 }
 
 .chat-input input {
-    flex-grow: 1;
+    flex-grow: 1; /* Allow input to take available space */
     padding: 8px;
     border: 2px dashed #4b74e0;
     border-radius: 5px;
@@ -299,6 +303,7 @@ body {
     background: #fff;
     font-size: 14px;
     outline: none;
+    width: 0; /* Allow flex-grow to control width */
 }
 
 .chat-input button {
@@ -310,6 +315,7 @@ body {
     font-family: 'Permanent Marker', cursive;
     cursor: pointer;
     transition: background-color 0.3s;
+    flex-shrink: 0; /* Prevent button from shrinking */
 }
 
 .chat-input button:hover {
@@ -487,18 +493,13 @@ body {
         justify-content: center;
     }
 
+    .header {
+        padding: 12px; /* Slightly less padding on mobile */
+        max-height: 130px; /* Slightly smaller for mobile */
+    }
+
     #brush-size {
         width: 80%;
-    }
-
-    .header {
-        flex-direction: column;
-        text-align: center;
-        padding: 8px;
-    }
-
-    .user-info {
-        margin-top: 10px;
     }
 
     .game-options {
@@ -514,15 +515,17 @@ body {
     }
 
     .chat-input {
-        flex-direction: column;
+        flex-direction: column; /* Stack input and button on mobile */
+        gap: 8px; /* Increase gap for better spacing */
     }
 
     .chat-input input {
-        width: 100%;
+        width: 100%; /* Full width on mobile */
     }
 
     .chat-input button {
-        width: 100%;
+        width: 100%; /* Full width on mobile */
+        padding: 10px; /* Slightly larger padding */
     }
 }
 
@@ -559,4 +562,21 @@ body {
 
 .fade-out {
     animation: fadeOut 0.6s forwards;
+}
+
+/* Styling for dynamically added admin controls */
+.game-button {
+    padding: 6px 12px; /* Slightly larger button */
+    font-size: 14px; /* Slightly larger text */
+    background-color: #4b74e0;
+    color: white;
+    border: 2px solid #333;
+    border-radius: 5px;
+    font-family: 'Permanent Marker', cursive;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.game-button:hover {
+    background-color: #3a5fc7;
 }
