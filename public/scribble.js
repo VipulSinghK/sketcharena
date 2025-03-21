@@ -112,7 +112,7 @@ function init() {
     setupEventListeners();
     window.addEventListener('resize', debounce(() => {
         const canvasContainer = document.querySelector('.canvas-container');
-        const newWidth = Math.max(canvasContainer.offsetWidth || 300, 1); // Match setupCanvas fallback
+        const newWidth = Math.max(canvasContainer.offsetWidth || 300, 1);
         const newHeight = Math.max(canvasContainer.offsetHeight || 300, 1);
         if (newWidth !== canvas.width || newHeight !== canvas.height) {
             saveCanvas();
@@ -206,8 +206,8 @@ function startGame() {
             alert('Please enter a valid number of rounds (1-10)');
             return;
         }
-        socket.emit('start-game', { totalRounds }); // Send rounds to server
-        startGameBtn.style.display = 'none';
+        socket.emit('start-game', { totalRounds });
+        // Do NOT hide the button here; wait for 'round-start'
     }
 }
 
@@ -349,6 +349,12 @@ function addChatMessage(data) {
     chatMessages.scrollTop = chatMessages.scrollHeight;
 }
 
+// Helper function to track button visibility changes
+function setButtonDisplay(value) {
+    console.log(`Setting startGameBtn display to: ${value}`);
+    startGameBtn.style.display = value;
+}
+
 socket.on('connect', () => {});
 
 socket.on('room-created', data => {
@@ -357,12 +363,12 @@ socket.on('room-created', data => {
     roomCodeDisplay.textContent = `Room Code: ${data.roomId}`;
     welcomeScreen.classList.add('hidden');
     gameContainer.classList.remove('hidden');
-    setupCanvas(); // Initialize canvas when container is visible
+    setupCanvas();
     if (isAdmin) {
-        startGameBtn.style.display = 'block';
-        roundsSelector.style.display = 'flex'; // Show rounds selector for admin
+        setButtonDisplay('block');
+        roundsSelector.style.display = 'flex';
     } else {
-        roundsSelector.style.display = 'none'; // Hide for non-admins
+        roundsSelector.style.display = 'none';
     }
 });
 
@@ -372,13 +378,16 @@ socket.on('room-joined', data => {
     roomCodeDisplay.textContent = `Room Code: ${data.roomId}`;
     welcomeScreen.classList.add('hidden');
     gameContainer.classList.remove('hidden');
-    setupCanvas(); // Initialize canvas when container is visible
+    setupCanvas();
     updatePlayersList(data.players);
     if (isAdmin && data.players.length >= 2) {
-        startGameBtn.style.display = 'block';
-        roundsSelector.style.display = 'flex'; // Show rounds selector for admin
+        setButtonDisplay('block');
+        roundsSelector.style.display = 'flex';
+    } else if (isAdmin) {
+        setButtonDisplay('block'); // Still show button, but game won't start until 2+ players
+        roundsSelector.style.display = 'flex';
     } else {
-        roundsSelector.style.display = 'none'; // Hide for non-admins
+        roundsSelector.style.display = 'none';
     }
 });
 
@@ -388,8 +397,16 @@ socket.on('update-players', data => updatePlayersList(data.players));
 socket.on('chat-message', data => addChatMessage(data));
 socket.on('can-start-game', data => {
     if (isAdmin && data) {
-        startGameBtn.style.display = 'block';
-        roundsSelector.style.display = 'flex'; // Ensure rounds selector is visible
+        setButtonDisplay('block');
+        roundsSelector.style.display = 'flex';
+    }
+});
+
+socket.on('start-game-error', data => {
+    alert(data.message || 'Cannot start game: At least 2 players are required.');
+    if (isAdmin) {
+        setButtonDisplay('block'); // Ensure button stays visible
+        roundsSelector.style.display = 'flex';
     }
 });
 
@@ -397,6 +414,10 @@ socket.on('round-start', data => {
     roundMessage.textContent = `Round ${data.round} of ${data.totalRounds}`;
     roundMessage.classList.remove('hidden');
     setTimeout(() => roundMessage.classList.add('hidden'), 3000);
+    if (isAdmin) {
+        setButtonDisplay('none'); // Hide button only when game starts
+        roundsSelector.style.display = 'none';
+    }
 });
 
 socket.on('game-state', data => {
@@ -462,7 +483,7 @@ socket.on('game-end', data => {
     if (isAdmin) {
         const playAgainBtn = document.getElementById('play-again-btn');
         playAgainBtn.addEventListener('click', () => {
-            socket.emit('start-game', { totalRounds: parseInt(roundsInput.value, 10) }); // Send rounds again
+            socket.emit('start-game', { totalRounds: parseInt(roundsInput.value, 10) });
             roundTransition.classList.add('hidden');
         });
     }
@@ -481,7 +502,7 @@ socket.on('room-reset', () => {
     scoresUpdate.classList.add('hidden');
     roundTransition.classList.add('hidden');
     if (isAdmin) {
-        startGameBtn.style.display = 'block';
+        setButtonDisplay('block');
         roundsSelector.style.display = 'flex';
     }
 });
@@ -494,7 +515,7 @@ socket.on('kicked', data => {
 socket.on('admin-assigned', data => {
     isAdmin = data.isAdmin;
     if (isAdmin) {
-        startGameBtn.style.display = 'block';
+        setButtonDisplay('block');
         roundsSelector.style.display = 'flex';
     } else {
         roundsSelector.style.display = 'none';

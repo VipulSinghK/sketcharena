@@ -153,7 +153,7 @@ io.on('connection', (socket) => {
             room.totalRounds = totalRounds; // Update room's totalRounds
             startGame(roomId);
         } else {
-            socket.emit('error', { message: `Need at least ${MIN_PLAYERS} players to start` });
+            socket.emit('start-game-error', { message: `Need at least ${MIN_PLAYERS} players to start` });
         }
     });
 
