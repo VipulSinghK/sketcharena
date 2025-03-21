@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Scribble Game</title>
     <link rel="icon" type="image/png" href="favicon.png">
-<link rel="shortcut icon" type="image/x-icon" href="favicon.ico">
+    <link rel="shortcut icon" type="image/x-icon" href="favicon.ico">
     <link rel="stylesheet" href="scribble.css">
 </head>
 <body>
@@ -100,5 +100,42 @@
     
     <script src="/socket.io/socket.io.js"></script>
     <script src="scribble.js"></script>
+    <script>
+        // Disable right-click (redundant with scribble.js, but kept here for clarity)
+        document.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+            alert('Right-click is disabled for security reasons.');
+        });
+
+        // Block developer tools shortcuts
+        document.addEventListener('keydown', (e) => {
+            if ((e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J')) || 
+                (e.ctrlKey && e.key === 'U') || 
+                e.key === 'F12') {
+                e.preventDefault();
+                alert('Developer tools shortcuts are disabled.');
+            }
+        });
+
+        // Detect developer tools opening
+        (function() {
+            let devtoolsOpen = false;
+            const threshold = 160;
+            setInterval(() => {
+                if (window.outerWidth - window.innerWidth > threshold || 
+                    window.outerHeight - window.innerHeight > threshold) {
+                    if (!devtoolsOpen) {
+                        devtoolsOpen = true;
+                        alert('Please close developer tools to continue.');
+                        // Optionally disable canvas interaction
+                        document.getElementById('drawing-board').style.pointerEvents = 'none';
+                    }
+                } else {
+                    devtoolsOpen = false;
+                    document.getElementById('drawing-board').style.pointerEvents = 'auto';
+                }
+            }, 500);
+        })();
+    </script>
 </body>
 </html>

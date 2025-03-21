@@ -2,6 +2,7 @@ const socket = io({
     reconnectionDelayMax: 10000,
     transports: ['websocket']
 });
+document.addEventListener('contextmenu', (e) => e.preventDefault());
 
 const welcomeScreen = document.querySelector('.welcome-screen');
 const usernameSection = document.querySelector('.username-section');
