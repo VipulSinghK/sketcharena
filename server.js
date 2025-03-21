@@ -18,7 +18,6 @@ const io = socketIo(server, {
 app.use(express.static(path.join(__dirname, 'public')));
 
 const ROUND_TIME = 60;
-const ROUNDS_PER_GAME = 3;
 const MIN_PLAYERS = 2;
 const MAX_PLAYERS = 10;
 
@@ -48,7 +47,7 @@ io.on('connection', (socket) => {
                 }],
                 status: 'waiting',
                 round: 0,
-                totalRounds: ROUNDS_PER_GAME,
+                totalRounds: 3, // Default value, will be updated by admin
                 currentWord: null,
                 timeLeft: ROUND_TIME,
                 timer: null,
@@ -133,7 +132,7 @@ io.on('connection', (socket) => {
         }
     });
 
-    socket.on('start-game', () => {
+    socket.on('start-game', (data) => {
         const roomId = socket.roomId;
         if (!roomId || !rooms.has(roomId)) return;
 
@@ -145,6 +144,13 @@ io.on('connection', (socket) => {
         }
 
         if (room.players.length >= MIN_PLAYERS && room.status === 'waiting') {
+            // Set totalRounds from client data, with validation
+            const totalRounds = parseInt(data.totalRounds, 10);
+            if (isNaN(totalRounds) || totalRounds < 1 || totalRounds > 10) {
+                socket.emit('error', { message: 'Invalid number of rounds (must be 1-10)' });
+                return;
+            }
+            room.totalRounds = totalRounds; // Update room's totalRounds
             startGame(roomId);
         } else {
             socket.emit('error', { message: `Need at least ${MIN_PLAYERS} players to start` });

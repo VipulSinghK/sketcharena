@@ -37,6 +37,23 @@ startGameBtn.id = 'start-game-btn';
 startGameBtn.textContent = 'Start Game';
 startGameBtn.classList.add('game-button');
 startGameBtn.style.display = 'none';
+
+// Add rounds selector for admin
+const roundsSelector = document.createElement('div');
+roundsSelector.className = 'rounds-selector';
+const roundsLabel = document.createElement('label');
+roundsLabel.textContent = 'Rounds:';
+roundsLabel.setAttribute('for', 'rounds-input');
+const roundsInput = document.createElement('input');
+roundsInput.type = 'number';
+roundsInput.id = 'rounds-input';
+roundsInput.min = '1';
+roundsInput.max = '10'; // Reasonable upper limit
+roundsInput.value = '3'; // Default number of rounds
+roundsSelector.appendChild(roundsLabel);
+roundsSelector.appendChild(roundsInput);
+
+adminControlsContainer.appendChild(roundsSelector);
 adminControlsContainer.appendChild(startGameBtn);
 
 let currentColor = '#000000';
@@ -183,7 +200,12 @@ function joinRoom() {
 
 function startGame() {
     if (isAdmin) {
-        socket.emit('start-game');
+        const totalRounds = parseInt(roundsInput.value, 10);
+        if (isNaN(totalRounds) || totalRounds < 1 || totalRounds > 10) {
+            alert('Please enter a valid number of rounds (1-10)');
+            return;
+        }
+        socket.emit('start-game', { totalRounds }); // Send rounds to server
         startGameBtn.style.display = 'none';
     }
 }
@@ -335,7 +357,12 @@ socket.on('room-created', data => {
     welcomeScreen.classList.add('hidden');
     gameContainer.classList.remove('hidden');
     setupCanvas(); // Initialize canvas when container is visible
-    if (isAdmin) startGameBtn.style.display = 'block';
+    if (isAdmin) {
+        startGameBtn.style.display = 'block';
+        roundsSelector.style.display = 'flex'; // Show rounds selector for admin
+    } else {
+        roundsSelector.style.display = 'none'; // Hide for non-admins
+    }
 });
 
 socket.on('room-joined', data => {
@@ -346,7 +373,12 @@ socket.on('room-joined', data => {
     gameContainer.classList.remove('hidden');
     setupCanvas(); // Initialize canvas when container is visible
     updatePlayersList(data.players);
-    if (isAdmin && data.players.length >= 2) startGameBtn.style.display = 'block';
+    if (isAdmin && data.players.length >= 2) {
+        startGameBtn.style.display = 'block';
+        roundsSelector.style.display = 'flex'; // Show rounds selector for admin
+    } else {
+        roundsSelector.style.display = 'none'; // Hide for non-admins
+    }
 });
 
 socket.on('join-error', data => alert(data.message));
@@ -354,7 +386,10 @@ socket.on('error', data => alert(data.message));
 socket.on('update-players', data => updatePlayersList(data.players));
 socket.on('chat-message', data => addChatMessage(data));
 socket.on('can-start-game', data => {
-    if (isAdmin && data) startGameBtn.style.display = 'block';
+    if (isAdmin && data) {
+        startGameBtn.style.display = 'block';
+        roundsSelector.style.display = 'flex'; // Ensure rounds selector is visible
+    }
 });
 
 socket.on('round-start', data => {
@@ -403,7 +438,6 @@ socket.on('round-end', data => {
 });
 
 socket.on('game-end', data => {
-    // Create structured HTML for the game over screen
     let gameOverHTML = `
         <div class="game-over-content">
             <h2>Game Over!</h2>
@@ -414,7 +448,6 @@ socket.on('game-end', data => {
             </div>
     `;
 
-    // Add "Play Again" button only if the user is the admin
     if (isAdmin) {
         gameOverHTML += `
             <button id="play-again-btn" class="game-button">Play Again</button>
@@ -425,16 +458,14 @@ socket.on('game-end', data => {
     roundTransition.innerHTML = gameOverHTML;
     roundTransition.classList.remove('hidden');
 
-    // Add event listener for "Play Again" button if admin
     if (isAdmin) {
         const playAgainBtn = document.getElementById('play-again-btn');
         playAgainBtn.addEventListener('click', () => {
-            socket.emit('start-game'); // Trigger a new game
-            roundTransition.classList.add('hidden'); // Hide the game over screen
+            socket.emit('start-game', { totalRounds: parseInt(roundsInput.value, 10) }); // Send rounds again
+            roundTransition.classList.add('hidden');
         });
     }
 
-    // Auto-hide after 10 seconds if no action is taken
     setTimeout(() => {
         roundTransition.classList.add('hidden');
     }, 10000);
@@ -448,7 +479,10 @@ socket.on('room-reset', () => {
     wordReveal.classList.add('hidden');
     scoresUpdate.classList.add('hidden');
     roundTransition.classList.add('hidden');
-    startGameBtn.style.display = isAdmin ? 'block' : 'none';
+    if (isAdmin) {
+        startGameBtn.style.display = 'block';
+        roundsSelector.style.display = 'flex';
+    }
 });
 
 socket.on('kicked', data => {
@@ -458,7 +492,12 @@ socket.on('kicked', data => {
 
 socket.on('admin-assigned', data => {
     isAdmin = data.isAdmin;
-    if (isAdmin) startGameBtn.style.display = 'block';
+    if (isAdmin) {
+        startGameBtn.style.display = 'block';
+        roundsSelector.style.display = 'flex';
+    } else {
+        roundsSelector.style.display = 'none';
+    }
 });
 
 document.addEventListener('DOMContentLoaded', init);

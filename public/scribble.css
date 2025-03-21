@@ -69,6 +69,32 @@ body {
 .admin-controls {
     display: flex;
     justify-content: center; /* Systematic alignment */
+    gap: 10px; /* Space between controls */
+    flex-wrap: wrap; /* Allow wrapping on small screens */
+}
+
+.rounds-selector {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.rounds-selector label {
+    font-family: 'Permanent Marker', cursive;
+    color: #4a4a4a;
+    font-size: clamp(12px, 2.5vw, 14px);
+}
+
+.rounds-selector input {
+    width: 60px;
+    padding: 5px;
+    border: 2px dashed #4b74e0;
+    border-radius: 5px;
+    font-family: 'Permanent Marker', cursive;
+    font-size: 14px;
+    text-align: center;
+    background-color: #fff;
+    outline: none;
 }
 
 /* Game Container */
@@ -276,7 +302,7 @@ body {
 .chat-message .username {
     font-weight: bold;
     color: #ff4081;
-    text-decoration: wavy underline;
+    
 }
 
 .chat-message .correct-guess {
@@ -618,6 +644,10 @@ body {
     #play-again-btn {
         padding: 8px 16px;
         font-size: clamp(14px, 3.5vw, 16px);
+    }
+
+    .rounds-selector input {
+        width: 50px;
     }
 }
 
