@@ -39,7 +39,6 @@ startGameBtn.textContent = 'Start Game';
 startGameBtn.classList.add('game-button');
 startGameBtn.style.display = 'none';
 
-// Add rounds selector for admin
 const roundsSelector = document.createElement('div');
 roundsSelector.className = 'rounds-selector';
 const roundsLabel = document.createElement('label');
@@ -49,8 +48,8 @@ const roundsInput = document.createElement('input');
 roundsInput.type = 'number';
 roundsInput.id = 'rounds-input';
 roundsInput.min = '1';
-roundsInput.max = '10'; // Reasonable upper limit
-roundsInput.value = '3'; // Default number of rounds
+roundsInput.max = '10';
+roundsInput.value = '3'; 
 roundsSelector.appendChild(roundsLabel);
 roundsSelector.appendChild(roundsInput);
 
@@ -71,7 +70,7 @@ let canvasData = null;
 function setupCanvas() {
     const canvasContainer = document.querySelector('.canvas-container');
     if (!canvasContainer || !canvas) return;
-    const width = Math.max(canvasContainer.offsetWidth || 300, 1); // Mobile-friendly fallback
+    const width = Math.max(canvasContainer.offsetWidth || 300, 1); 
     const height = Math.max(canvasContainer.offsetHeight || 300, 1);
     canvas.width = width;
     canvas.height = height;
@@ -106,7 +105,7 @@ function debounce(func, wait) {
 
 function init() {
     if (!document.querySelector('.canvas-container') || !canvas) {
-        setTimeout(init, 100); // Retry if DOM isn't ready
+        setTimeout(init, 100); 
         return;
     }
     setupEventListeners();
